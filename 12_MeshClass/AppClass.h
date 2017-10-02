@@ -16,7 +16,56 @@ class Application
 {
 	MyMesh* m_pMesh = nullptr;
 	MyMesh* m_pMesh1 = nullptr;
+	
+	MyMesh* cubeArr[46];
 
+
+	matrix4 cube0;
+	matrix4 cube1;
+	matrix4 cube2;
+	matrix4 cube3;
+	matrix4 cube4;
+	matrix4 cube5;
+	matrix4 cube6;
+	matrix4 cube7;
+	matrix4 cube8;
+	matrix4 cube9;
+	matrix4 cube10;
+	matrix4 cube11;
+	matrix4 cube12;
+	matrix4 cube13;
+	matrix4 cube14;
+	matrix4 cube15;
+	matrix4 cube16;
+	matrix4 cube17;
+	matrix4 cube18;
+	matrix4 cube19;
+	matrix4 cube20;
+	matrix4 cube21;
+	matrix4 cube22;
+	matrix4 cube23;
+	matrix4 cube24;
+	matrix4 cube25;
+	matrix4 cube26;
+	matrix4 cube27;
+	matrix4 cube28;
+	matrix4 cube29;
+	matrix4 cube30;
+	matrix4 cube31;
+	matrix4 cube32;
+	matrix4 cube33;
+	matrix4 cube34;
+	matrix4 cube35;
+	matrix4 cube36;
+	matrix4 cube37;
+	matrix4 cube38;
+	matrix4 cube39;
+	matrix4 cube40;
+	matrix4 cube41;
+	matrix4 cube42;
+	matrix4 cube43;
+	matrix4 cube44;
+	matrix4 cube45;
 	String m_sProgrammer = "Alberto Bobadilla - labigm@rit.edu";
 private:
 	static ImGuiObject gui; //GUI object
