@@ -54,6 +54,7 @@ void Application::Display(void)
 	static uint uClock = m_pSystem->GenClock(); //generate a new clock for that timer
 	fTimer += m_pSystem->GetDeltaTime(uClock); //get the delta time for that timer
 
+
 	//calculate the current position
 	vector3 v3CurrentPos;
 	
@@ -61,20 +62,36 @@ void Application::Display(void)
 
 
 
-	//your code goes here
+
 	v3CurrentPos = vector3(0.0f, 0.0f, 0.0f);
-	//-------------------
-	
+	vector3 v3Start; 
+	vector3 v3End; 
+	static uint route = 0; 
+	v3Start = m_stopsList[route]; 
+	v3End = m_stopsList[(route + 1) % m_stopsList.size()];
+
+										
+	float fTimeBetweenStops = 2.0;
+	float fPercentage = MapValue(fTimer, 0.0f, fTimeBetweenStops, 0.0f, 1.0f);
 
 
+	v3CurrentPos = glm::lerp(v3Start, v3End, fPercentage);
+	matrix4 m4Model = glm::translate(IDENTITY_M4, v3CurrentPos);
 	
-	matrix4 m4Model = glm::translate(v3CurrentPos);
+	if (fPercentage >= 1.0f)
+	{
+		route++; 
+		fTimer = m_pSystem->GetDeltaTime(uClock);
+		route %= m_stopsList.size();
+	}
+
+	
 	m_pModel->SetModelMatrix(m4Model);
 
-	m_pMeshMngr->Print("\nTimer: ");//Add a line on top
+	m_pMeshMngr->Print("\nTimer: ");
 	m_pMeshMngr->PrintLine(std::to_string(fTimer), C_YELLOW);
 
-	// Draw stops
+
 	for (uint i = 0; i < m_stopsList.size(); ++i)
 	{
 		m_pMeshMngr->AddSphereToRenderList(glm::translate(m_stopsList[i]) * glm::scale(vector3(0.05f)), C_GREEN, RENDER_WIRE);

@@ -275,9 +275,27 @@ void MyMesh::GenerateCone(float a_fRadius, float a_fHeight, int a_nSubdivisions,
 	Release();
 	Init();
 
+	std::vector<vector3> vertices;
+	vector3 justTheTip(0, a_fHeight, 0);
+	for (int i = 0; i < a_nSubdivisions; i++) {
+		float angle = (2 * PI * (float)i) / (float)a_nSubdivisions;
+		float x = cos(angle) * a_fRadius;
+		float z = sin(angle) * a_fRadius;
+
+		vertices.push_back(vector3(x, 0.0f, z));
+	}
+
+	int pointIndex = 0;
+	for (int i = 0; i < vertices.size(); i++) {
+		pointIndex = i + 1;
+		if (pointIndex >= vertices.size()) {
+			pointIndex = 0;
+		}
+		AddTri(vertices[pointIndex], vector3(0, 0, 0), vertices[i]);
+		AddTri(vertices[i], justTheTip, vertices[pointIndex]);
+	}
 	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
-	// -------------------------------
+	//GenerateCube(a_fRadius * 2.0f, a_v3Color);
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
@@ -300,9 +318,35 @@ void MyMesh::GenerateCylinder(float a_fRadius, float a_fHeight, int a_nSubdivisi
 	Init();
 
 	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
-	// -------------------------------
+	//GenerateCube(a_fRadius * 2.0f, a_v3Color);
+	std::vector<vector3> base;
+	std::vector<vector3> ceiling;
 
+	for (int i = 0; i < a_nSubdivisions; i++) {
+		float angle = (2 * PI * (float)i) / (float)a_nSubdivisions;
+		float x = cos(angle) * a_fRadius;
+		float z = sin(angle) * a_fRadius;
+
+		base.push_back(vector3(x, 0.0f, z));
+		ceiling.push_back(vector3(x, a_fHeight, z));
+	}
+
+	int pointIndex = 0;
+	for (int i = 0; i < base.size(); i++) {
+		pointIndex = i + 1;
+		if (pointIndex >= base.size()) {
+			pointIndex = 0;
+		}
+		AddTri(base[pointIndex], vector3(0, 0, 0), base[i]);
+		AddTri(ceiling[i], vector3(0, a_fHeight, 0), ceiling[pointIndex]);
+	}
+	for (int i = 0; i < a_nSubdivisions; i++) {
+		pointIndex = i + 1;
+		if (pointIndex >= base.size()) {
+			pointIndex = 0;
+		}
+		AddQuad(base[pointIndex], base[i], ceiling[pointIndex], ceiling[i]);
+	}
 	// Adding information about color
 	CompleteMesh(a_v3Color);
 	CompileOpenGL3X();
@@ -330,9 +374,40 @@ void MyMesh::GenerateTube(float a_fOuterRadius, float a_fInnerRadius, float a_fH
 	Init();
 
 	// Replace this with your code
-	GenerateCube(a_fOuterRadius * 2.0f, a_v3Color);
-	// -------------------------------
+	//GenerateCube(a_fOuterRadius * 2.0f, a_v3Color);
+	std::vector<vector3> base;
+	std::vector<vector3> ceiling;
+	std::vector<vector3> innerWall;
+	std::vector<vector3> outerWall;
 
+	for (int i = 0; i < a_nSubdivisions; i++) {
+		float angle = (2 * PI * (float)i) / (float)a_nSubdivisions;
+		float z = sin(angle) * a_fOuterRadius;
+		float x = cos(angle) * a_fOuterRadius;
+
+		float d = sin(angle) * a_fInnerRadius;
+		float s = cos(angle) * a_fInnerRadius;
+
+		outerWall.push_back(vector3(x, 0.0f, z));
+		innerWall.push_back(vector3(x, a_fHeight, z));
+		
+		base.push_back(vector3(s, 0.0f, d));
+		ceiling.push_back(vector3(s, a_fHeight, d));
+	}
+
+	int pointIndex = 0;
+	for (int i = 0; i < a_nSubdivisions; i++) {
+		pointIndex = i + 1;
+		if (pointIndex >= base.size()) {
+			pointIndex = 0;
+		}
+		AddQuad(base[pointIndex], base[i], outerWall[pointIndex], outerWall[i]);
+		AddQuad(innerWall[pointIndex], innerWall[i], ceiling[pointIndex], ceiling[i]);
+
+		AddQuad(innerWall[i], innerWall[pointIndex], outerWall[i], outerWall[pointIndex]);
+		
+		AddQuad(ceiling[pointIndex], ceiling[i], base[pointIndex], base[i]);
+	}
 	// Adding information about color
 	CompleteMesh(a_v3Color);
 	CompileOpenGL3X();
@@ -361,10 +436,7 @@ void MyMesh::GenerateTorus(float a_fOuterRadius, float a_fInnerRadius, int a_nSu
 	Release();
 	Init();
 
-	// Replace this with your code
-	GenerateCube(a_fOuterRadius * 2.0f, a_v3Color);
-	// -------------------------------
-
+	
 	// Adding information about color
 	CompleteMesh(a_v3Color);
 	CompileOpenGL3X();
@@ -380,15 +452,52 @@ void MyMesh::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a_v3Co
 		GenerateCube(a_fRadius * 2.0f, a_v3Color);
 		return;
 	}
-	if (a_nSubdivisions > 6)
-		a_nSubdivisions = 6;
+	if (a_nSubdivisions > 10)
+		a_nSubdivisions = 10;
 
 	Release();
 	Init();
 
-	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
-	// -------------------------------
+	std::vector<vector3> longitude;
+	std::vector<vector3> latitude;
+	float its = 360 / a_nSubdivisions;
+	float theta = 0.0f;
+	float phi = 0.0f;
+	float a1 = 0.0f;
+	float a2 = 0.0f;
+	float b1 = 0.0f;
+	float b2 = 0.0f;
+
+
+	for (float ang1 = -90.0f; ang1 < 90.0f; ang1 += its) {
+		a1 = (float)cos(ang1 * PI / 180.0);
+		a2 = (float)cos((ang1 + its) * PI / 180.0);
+		b1 = (float)sin(ang1 * PI / 180.0) * a_fRadius;
+		b2 = (float)sin((ang1 + its) * PI / 180.0) * a_fRadius;
+
+		for (float ang2 = 0.0f; ang2 <= 360.0; ang2 += its) {
+			theta = (float)cos(ang2 * PI / 180.0f) * a_fRadius;
+			phi = (float)sin(ang2 * PI / 180.0f) * a_fRadius;
+			float latX = a2 * theta;
+			float latY = b2;
+			float latZ = a2 * phi;
+			float lonX = a1 * theta;
+			float lonY = b1;
+			float lonZ = a1 * phi;
+
+			longitude.push_back(vector3(lonX, lonY, lonZ));
+			latitude.push_back(vector3(latX, latY, latZ));
+		}
+
+	}
+	int index = 0;
+	for (int i = 0; i < latitude.size(); i++) {
+		index++;
+		if (index >= latitude.size()) {
+			index = 0;
+		}
+		AddQuad(latitude[i], latitude[index], longitude[i], longitude[index]);
+	}
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
