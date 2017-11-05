@@ -368,8 +368,59 @@ void Application::CameraRotation(float a_fSpeed)
 		fDeltaMouse = static_cast<float>(MouseY - CenterY);
 		fAngleX += fDeltaMouse * a_fSpeed;
 	}
-	//Change the Yaw and the Pitch of the camera
-	SetCursorPos(CenterX, CenterY);//Position the mouse in the center
+	/*
+	     ____.     .__  .__                     ____.                                   __            
+    |    |__ __|  | |__|____    ____       |    |____    ____  __ __  _____________|  | _______   
+    |    |  |  \  | |  \__  \  /    \      |    \__  \  /    \|  |  \/  ___/\___   /  |/ /\__  \  
+/\__|    |  |  /  |_|  |/ __ \|   |  \ /\__|    |/ __ \|   |  \  |  /\___ \  /    /|    <  / __ \_
+\________|____/|____/__(____  /___|  / \________(____  /___|  /____//____  >/_____ \__|_ \(____  /
+                            \/     \/                \/     \/           \/       \/    \/     \/ 
+	*/
+
+	//A04 Starts here
+
+	//Upward and right vector in local scope
+	vector3 upVec = m_pCameraMngr->GetUpward();
+	vector3 rightVec = m_pCameraMngr->GetRightward();
+	
+	//CALCULATE QUATERNIONS FOR YAW AND PITCH!!!//
+
+	//Calculate Yaw
+	float yawSin = sin(fAngleY / 2.0f);
+	float yawCos = cos(fAngleY / 2.0f);
+	glm::quat yawQuaternion = glm::quat(yawCos, upVec.x * yawSin, upVec.y * yawSin, upVec.z * yawSin);
+	//Use quat to update target of camera
+	target = position + (yawQuaternion * (target - position));
+	
+	//Calculate Pitch
+	float pitchSin = sin(-fAngleX / 2.0f);
+	float pitchCos = cos(-fAngleX / 2.0f);	
+	glm::quat pitchQuaternion = glm::quat(pitchCos, rightVec.x * pitchSin, rightVec.y * pitchSin, rightVec.z * pitchSin);
+	//Use quat to update target of camera
+	target = position + (pitchQuaternion * (target - position));
+
+	//Set target in camera
+	m_pCamera->SetTarget(target);
+
+	m_pCamera->SetUp(upVec);
+
+	//Calculate forward vector using normalize
+	vector3 forwardVec = glm::normalize(target - position);
+
+	m_pCameraMngr->SetForward(forwardVec);
+
+	m_pCameraMngr->SetRightward(glm::cross(forwardVec, upVec));
+	
+	m_pCameraMngr->SetUpward(upVec);
+
+	//Reset proj and view matrices
+	m_pCamera->CalculateProjectionMatrix();
+	m_pCamera->CalculateViewMatrix();
+	
+	//Center cursor
+	SetCursorPos(CenterX, CenterY);
+
+	
 }
 //Keyboard
 void Application::ProcessKeyboard(void)
@@ -385,6 +436,59 @@ void Application::ProcessKeyboard(void)
 
 	if (fMultiplier)
 		fSpeed *= 5.0f;
+
+	//PROCESS MOVING THE CAMERA
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+
+		//Get vec in direction key accords with (W/S forward, A/D rightward)
+		vector3 moveForward = m_pCameraMngr->GetForward();
+		//Change pos and target using speed and direction vector
+		position += moveForward * fSpeed;
+		target += moveForward * fSpeed;
+
+		//Set pos and tar in camera and adjust projection and view matrix
+		m_pCamera->SetPosition(position);
+		m_pCamera->SetTarget(target);
+		m_pCamera->CalculateProjectionMatrix();
+		m_pCamera->CalculateViewMatrix();
+
+	}
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+		
+		vector3 moveLeft = m_pCameraMngr->GetRightward();
+		position -= moveLeft * fSpeed;
+		target -= moveLeft * fSpeed;
+
+		m_pCamera->SetPosition(position);
+		m_pCamera->SetTarget(target);
+		m_pCamera->CalculateProjectionMatrix();
+		m_pCamera->CalculateViewMatrix();
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+
+		vector3 moveRight = m_pCameraMngr->GetRightward();
+		position += moveRight * fSpeed;
+		target += moveRight * fSpeed;
+
+		m_pCamera->SetPosition(position);
+		m_pCamera->SetTarget(target);
+		m_pCamera->CalculateProjectionMatrix();
+		m_pCamera->CalculateViewMatrix();
+	}
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+
+		vector3 moveBackward = m_pCameraMngr->GetForward();
+		position -= moveBackward * fSpeed;
+		target -= moveBackward * fSpeed;
+
+		m_pCamera->SetPosition(position);
+		m_pCamera->SetTarget(target);
+		m_pCamera->CalculateProjectionMatrix();
+		m_pCamera->CalculateViewMatrix();
+	}
+
 #pragma endregion
 }
 //Joystick

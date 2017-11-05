@@ -16,6 +16,9 @@ namespace Simplex
 
 class Application
 {
+	//Pos and target vecs for camera
+	vector3 position = vector3(0.0f, 1.0f, 29.0f);
+	vector3 target = vector3(0.0f, 1.0f, 25.0f);
 	MyCamera* m_pCamera = nullptr; //Camera class
 	MyMeshManager* m_pMyMeshMngr = nullptr; //My Mesh Manager
 	String m_sProgrammer = "Alberto Bobadilla - labigm@rit.edu"; //Programmer
