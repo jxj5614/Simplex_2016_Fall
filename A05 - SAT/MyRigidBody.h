@@ -13,6 +13,11 @@ namespace Simplex
 //System Class
 class MyRigidBody
 {
+	vector3 shape1[8];
+	vector3 shape2[8];
+	vector3 locMin2;
+	vector3 locMax2;
+	vector3 shapeVecs[15];
 	MeshManager* m_pMeshMngr = nullptr; //for displaying the Rigid Body
 
 	bool m_bVisibleBS = false; //Visibility of bounding sphere

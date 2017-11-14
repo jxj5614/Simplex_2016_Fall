@@ -276,16 +276,56 @@ void MyRigidBody::AddToRenderList(void)
 
 uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 {
-	/*
-	Your code goes here instead of this comment;
+	//Get local min and max for second shape
+	locMin2 = a_pOther->GetMinLocal();
+	locMax2 = a_pOther->GetMaxLocal();
 
-	For this method, if there is an axis that separates the two objects
-	then the return will be different than 0; 1 for any separating axis
-	is ok if you are not going for the extra credit, if you could not
-	find a separating axis you need to return 0, there is an enum in
-	Simplex that might help you [eSATResults] feel free to use it.
-	(eSATResults::SAT_NONE has a value of 0)
-	*/
+	//Calculate points in shape 1 
+	shape1[0] = m_v3MinL;
+	shape1[1] = vector3(m_v3MaxL.x, m_v3MinL.y, m_v3MinL.z);
+	shape1[2] = vector3(m_v3MinL.x, m_v3MaxL.y, m_v3MinL.z);
+	shape1[3] = vector3(m_v3MaxL.x, m_v3MaxL.y, m_v3MinL.z);
+	shape1[4] = vector3(m_v3MinL.x, m_v3MinL.y, m_v3MaxL.z);
+	shape1[5] = vector3(m_v3MaxL.x, m_v3MinL.y, m_v3MaxL.z);
+	shape1[6] = vector3(m_v3MinL.x, m_v3MaxL.y, m_v3MaxL.z);
+	shape1[7] = m_v3MaxL;
+
+	//Calculate points in shape 2 
+	shape2[0] = locMin2;
+	shape2[1] = vector3(locMax2.x, locMin2.y, locMin2.z);
+	shape2[2] = vector3(locMin2.x, locMax2.y, locMin2.z);
+	shape2[3] = vector3(locMax2.x, locMax2.y, locMin2.z);
+	shape2[4] = vector3(locMin2.x, locMin2.y, locMax2.z);
+	shape2[5] = vector3(locMax2.x, locMin2.y, locMax2.z);
+	shape2[6] = vector3(locMin2.x, locMax2.y, locMax2.z);
+	shape2[7] = locMax2;
+
+	//Place coordinates in world space
+	for (uint i = 0; i < 8; ++i)
+	{
+		shape1[i] = vector3(m_m4ToWorld * vector4(shape1[i], 1.0f));
+		shape2[i] = vector3(a_pOther->GetModelMatrix() * vector4(shape2[i], 1.0f));
+	}
+	//Get x y and z vec of first shape
+	shapeVecs[0] = shape1[1] - shape1[0]; 
+	shapeVecs[1] = shape1[2] - shape1[0]; 
+	shapeVecs[2] = shape1[4] - shape1[0]; 
+
+	//Get x y and z vec of second shape
+	shapeVecs[3] = shape2[1] - shape2[0]; 
+	shapeVecs[4] = shape2[2] - shape2[0]; 
+	shapeVecs[5] = shape2[4] - shape2[0]; 	
+
+	//Get rest of vecs by crossing each shapes vecs with vecs of other shape
+	shapeVecs[6] = glm::cross(shapeVecs[0], shapeVecs[3]); 
+	shapeVecs[7] = glm::cross(shapeVecs[0], shapeVecs[4]); 
+	shapeVecs[8] = glm::cross(shapeVecs[0], shapeVecs[5]); 
+	shapeVecs[9] = glm::cross(shapeVecs[1], shapeVecs[3]); 
+	shapeVecs[10] = glm::cross(shapeVecs[1], shapeVecs[4]); 
+	shapeVecs[11] = glm::cross(shapeVecs[1], shapeVecs[5]); 
+	shapeVecs[12] = glm::cross(shapeVecs[2], shapeVecs[3]); 
+	shapeVecs[13] = glm::cross(shapeVecs[2], shapeVecs[4]); 
+	shapeVecs[14] = glm::cross(shapeVecs[2], shapeVecs[5]); 
 
 	//there is no axis test that separates this two objects
 	return eSATResults::SAT_NONE;
