@@ -327,6 +327,44 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	shapeVecs[13] = glm::cross(shapeVecs[2], shapeVecs[4]); 
 	shapeVecs[14] = glm::cross(shapeVecs[2], shapeVecs[5]); 
 
+	//iterate over calculated vectors
+	for (int i = 0; i < 15; i++) {
+
+		//Current axis
+		vector3 axis = shapeVecs[i];
+
+		//Each shapes min and max point on axis
+		shape1Min = glm::dot(axis, shape1[0]);
+		shape2Min = glm::dot(axis, shape2[0]);
+
+		shape1Max = glm::dot(axis, shape1[0]);
+		shape2Max = glm::dot(axis, shape2[0]);
+		
+		//Separation test loop
+		for (int x = 0; x < 8; x++) {
+			
+			//If the dot prod of the axis and current point is less than either the max or min, set it to dotted value
+			if (glm::dot(axis, shape1[x]) < shape1Min)
+				shape1Min = glm::dot(axis, shape1[x]);
+			if (glm::dot(axis, shape1[x]) > shape1Max)
+				shape1Max = glm::dot(axis, shape1[x]);
+			if (glm::dot(axis, shape2[x]) < shape2Min)
+				shape2Min = glm::dot(axis, shape2[x]);
+			if (glm::dot(axis, shape2[x]) > shape2Max)
+				shape2Max = glm::dot(axis, shape2[x]);
+
+		}
+
+		//if shape 2 max is less than shape 1 min or shape 1 max is less than shape 2 min a separating axis must exist
+		if (shape2Max < shape1Min || shape1Max < shape2Min) {
+
+			//Since enum lines up with shapeVecs, set according in eSATResults
+			//i+1 to account for SAT_NONE, which would return a false collision
+			results = eSATResults(i + 1);
+			return results;
+		}
+	}
+
 	//there is no axis test that separates this two objects
 	return eSATResults::SAT_NONE;
 }

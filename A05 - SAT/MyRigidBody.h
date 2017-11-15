@@ -13,11 +13,20 @@ namespace Simplex
 //System Class
 class MyRigidBody
 {
+	//sat results enum
+	eSATResults results;
+
+	//Vec3s for points in both shapes
 	vector3 shape1[8];
 	vector3 shape2[8];
+
+	//Local min and max for second shape
 	vector3 locMin2;
 	vector3 locMax2;
 	vector3 shapeVecs[15];
+
+	//Each shapes min and max when dotted with axis
+	float shape1Min, shape2Min, shape1Max, shape2Max;
 	MeshManager* m_pMeshMngr = nullptr; //for displaying the Rigid Body
 
 	bool m_bVisibleBS = false; //Visibility of bounding sphere
